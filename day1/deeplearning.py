@@ -287,9 +287,31 @@ def linear_regression():
         #         saver.save(sess, "./tmp/model/my_linear.ckpt")
         # 加载模型
         if os.path.exists("./tmp/model/checkpoint"):
-                saver.restore(sess, "./tmp/model/my_linear.ckpt")
+            saver.restore(sess, "./tmp/model/my_linear.ckpt")
 
         print("训练后模型参数为：权重%f，偏置%f，损失为%f" % (weights.eval(), bias.eval(), error.eval()))
+
+    return None
+
+
+# 1）定义命令行参数
+tf.app.flags.DEFINE_integer("max_step", 100, "训练模型的步数")
+tf.app.flags.DEFINE_string("model_dir", "Unknown", "模型保存的路径+模型名字")
+
+# 2）简化变量名
+FLAGS = tf.app.flags.FLAGS
+
+def main(argv):
+    print("code start")
+    return None
+
+def command_demo():
+    """
+    命令行参数演示
+    :return:
+    """
+    print("max_step:\n", FLAGS.max_step)
+    print("model_dir:\n", FLAGS.model_dir)
 
     return None
 
@@ -308,4 +330,7 @@ if __name__ == '__main__':
     # 代码五： 变量演示
     # variable_demo()
     # 代码六： 线性回归案例
-    linear_regression()
+    # linear_regression()
+    # 代码七：  命令行参数演示
+    # command_demo()
+    tf.app.run()
