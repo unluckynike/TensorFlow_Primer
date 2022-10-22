@@ -229,7 +229,7 @@ def linear_regression():
     """
     # 1准备数据
     with tf.variable_scope("prepare_data"):
-        X = tf.random_normal(shape=[100, 1],name="feature")
+        X = tf.random_normal(shape=[100, 1], name="feature")
         y_true = tf.matmul(X, [[0.8]]) + 0.7
 
     # 2构建模型
@@ -257,6 +257,9 @@ def linear_regression():
     # 3_合并变量
     merged = tf.summary.merge_all()
 
+    # 创建saver对象
+    saver = tf.train.Saver()
+
     # 开启会话
     with tf.Session() as sess:
         # 初始化变量
@@ -270,14 +273,22 @@ def linear_regression():
         """
         print("训练前模型参数为：权重%f，偏置%f，损失为%f" % (weights.eval(), bias.eval(), error.eval()))
 
-        # 开始训练
-        for i in range(500):
-            sess.run(optimizer)
-            print("第%d次训练后模型参数为：权重%f，偏置%f，损失为%f" % (i + 1, weights.eval(), bias.eval(), error.eval()))
-        # 运行合并变量操作
-            summary = sess.run(merged)
-            # 将每次迭代后的变量写入事件文件
-            file_writer.add_summary(summary, i)
+        # # 开始训练
+        # for i in range(500):
+        #     sess.run(optimizer)
+        #     print("第%d次训练后模型参数为：权重%f，偏置%f，损失为%f" % (i + 1, weights.eval(), bias.eval(), error.eval()))
+        #     # 运行合并变量操作
+        #     summary = sess.run(merged)
+        #     # 将每次迭代后的变量写入事件文件
+        #     file_writer.add_summary(summary, i)
+        #
+        #     # 保存模型
+        #     if i % 10 == 0:
+        #         saver.save(sess, "./tmp/model/my_linear.ckpt")
+        # 加载模型
+        if os.path.exists("./tmp/model/checkpoint"):
+                saver.restore(sess, "./tmp/model/my_linear.ckpt")
+
         print("训练后模型参数为：权重%f，偏置%f，损失为%f" % (weights.eval(), bias.eval(), error.eval()))
 
     return None
