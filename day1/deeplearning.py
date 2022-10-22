@@ -3,7 +3,7 @@
 @File    ：deeplearning.py
 @Author  ：hailin
 @Date    ：2022/10/22 11:21 
-@Info    : 
+@Info    : 图 会话 张量 变量
 '''
 
 # import tensorflow as tf
@@ -36,14 +36,15 @@ def tensorflow_demo():
         print("c_t_value:\n", c_t_value)
     return None
 
+
 def graph_demo():
     """
     图演示
     :return:
     """
-    a_t=tf.constant(2,name="a_t")
-    b_t=tf.constant(3,name="a_t")
-    c_t=tf.add(a_t,b_t,name="c_t")
+    a_t = tf.constant(2, name="a_t")
+    b_t = tf.constant(3, name="a_t")
+    c_t = tf.add(a_t, b_t, name="c_t")
     print("a_t:\n", a_t)
     print("b_t:\n", b_t)
     print("c_t:\n", c_t)
@@ -88,6 +89,7 @@ def graph_demo():
         print("new_sess的图属性：\n", new_sess.graph)
 
     return None
+
 
 def session_demo():
     """
@@ -139,13 +141,130 @@ def session_demo():
         tf.summary.FileWriter("./tmp/summary", graph=sess.graph)
     return None
 
+
 def tensor_demo():
     """
     张量演示
     :return:
     """
+    tensor1 = tf.constant(4.0)
+    tensor2 = tf.constant([1, 2, 3, 4])
+    linear_squares = tf.constant([[4], [9], [16], [25]], dtype=tf.int32)
+    print("tensor1:\n", tensor1)  # 标量
+    print("tensor2:\n", tensor2)  # 向量
+    print("linear_squares:\n", linear_squares)  # 矩阵 （4，1）4行1列
+
+    print("zeros", tf.zeros(5))
+    # 张量的类型修改
+    l_cast = tf.cast(linear_squares, dtype=tf.float32)
+    print("l_cast:\n", l_cast)
+
+    # 张量形状改变
+    # 更新/改变静态形状
+    # 定义占位符
+    # 没有完全固定下来的静态形状
+    a_p = tf.placeholder(dtype=tf.float32, shape=[None, None])
+    b_p = tf.placeholder(dtype=tf.float32, shape=[None, 10])
+    c_p = tf.placeholder(dtype=tf.float32, shape=[3, 2])
+    print("a_p:\n", a_p)
+    print("b_p:\n", b_p)
+    print("c_p:\n", c_p)
+    # 更新形状未确定的部分
+    # a_p.set_shape([2, 3])
+    # b_p.set_shape([2, 10])
+    # c_p.set_shape([2, 3]) # 报错
+
+    # 查看更新后的形状
+    print("a_p:\n", a_p)
+    print("b_p:\n", b_p)
+    print("c_p:\n", c_p)
+
+    # 动态修改形状
+    print("-------动态修改形状------")
+    a_p_reshape = tf.reshape(a_p, shape=[2, 3, 1])
+    print("a_p:\n", a_p)
+    # print("b_p:\n", b_p)
+    print("a_p_reshape:\n", a_p_reshape)
+    c_p_reshape = tf.reshape(c_p, shape=[2, 3])
+    print("c_p:\n", c_p)
+    print("c_p_reshape:\n", c_p_reshape)
 
     return None
+
+
+def variable_demo():
+    """
+    变量的演示
+    :return:
+    """
+    # 创建变量
+    with tf.variable_scope("my_scope"):
+        a = tf.Variable(initial_value=50)
+        b = tf.Variable(initial_value=40)
+    with tf.variable_scope("your_scope"):
+        c = tf.add(a, b)
+    print("a:\n", a)
+    print("b:\n", b)
+    print("c:\n", c)
+
+    # 初始化变量
+    init = tf.global_variables_initializer()
+
+    # 开启会话
+    with tf.Session() as sess:
+        # 运行初始化
+        sess.run(init)
+        a_value, b_value, c_value = sess.run([a, b, c])
+        print("a_value:\n", a_value)
+        print("b_value:\n", b_value)
+        print("c_value:\n", c_value)
+
+    return None
+
+
+def linear_regression():
+    """
+    线性回归案例 自实现
+    :return:
+    """
+    # 1准备数据
+    X = tf.random_normal(shape=[100, 1])
+    y_true = tf.matmul(X, [[0.8]]) + 0.7
+
+    # 2构建模型
+    weights=tf.Variable(initial_value=tf.random_normal(shape=[1,1]),name="Weights")
+    bias=tf.Variable(initial_value=tf.random_normal(shape=[1,1]),name="Bias")
+    y_predict=tf.matmul(X,weights)+bias
+
+    # 3构造损失函数
+    error=tf.reduce_mean(tf.square(y_predict-y_true)) # 均方误差
+
+    # 4优化损失
+    optimizer=tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(error)# 梯度下降
+
+    # 显式地初始化变量
+    init=tf.global_variables_initializer()
+
+    # 开启会话
+    with tf.Session() as sess:
+        # 初始化变量
+        sess.run(init)
+
+        # 查看初始化模型参数之后的值
+        # print(y_true.eval())
+        # print("---------------------------")
+        # print(y_predict.eval())
+        print("训练前模型参数为：权重%f，偏置%f，损失为%f" % (weights.eval(), bias.eval(), error.eval()))
+
+        # 开始训练
+        for i in range(500):
+             sess.run(optimizer)
+             print("第%d次训练后模型参数为：权重%f，偏置%f，损失为%f" % (i + 1, weights.eval(), bias.eval(), error.eval()))
+
+        print("训练后模型参数为：权重%f，偏置%f，损失为%f" % (weights.eval(), bias.eval(), error.eval()))
+
+    return None
+
 
 if __name__ == '__main__':
     print(tf.__version__)
@@ -157,4 +276,8 @@ if __name__ == '__main__':
     # 代码三：会话演示
     # session_demo()
     # 代码四：张量演示
-    tensor_demo()
+    # tensor_demo()
+    # 代码五： 变量演示
+    # variable_demo()
+    # 代码六： 线性回归案例
+    linear_regression()
