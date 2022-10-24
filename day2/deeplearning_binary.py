@@ -45,8 +45,8 @@ class Cifar:
         print("image:\n", image)
 
         # 调整图片形状
-        image_reshaped=tf.reshape(image,[self.channel,self.height,self.width])
-        print("image_reshaped:\n",image_reshaped)
+        image_reshaped = tf.reshape(image, [self.channel, self.height, self.width])
+        print("image_reshaped:\n", image_reshaped)
 
         # 三维数组的转置
         image_transposed = tf.transpose(image_reshaped, [1, 2, 0])
@@ -60,7 +60,8 @@ class Cifar:
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-            key_new, value_new, decode_new,label_new,image_new,image_reshaped_new,image_batch_new= sess.run([key, value, image_decoded,label,image,image_reshaped,image_batch])
+            key_new, value_new, decode_new, label_new, image_new, image_reshaped_new, image_batch_new = sess.run(
+                [key, value, image_decoded, label, image, image_reshaped, image_batch])
             print("key_new:\n", key_new)
             print("value_new:\n", value_new)
             print("decode_new:\n", decode_new)
@@ -71,6 +72,31 @@ class Cifar:
 
             coord.request_stop()
             coord.join(threads)
+
+        return None
+
+
+    def write_to_tfrecords(self, image_batch, label_batch):
+        """
+        将样本的特征值和目标值一起写入tfrecords文件
+        :param image:
+        :param label:
+        :return:
+        """
+        with tf.python_io.TFRecordWriter("cifar10.tfrecords") as writer:
+            # 循环构造example对象，并序列化写入文件
+            for i in range(100):
+                image = image_batch[i].tostring()
+                label = label_batch[i][0]
+                # print("tfrecords_image:\n", image)
+                # print("tfrecords_label:\n", label)
+                example = tf.train.Example(features=tf.train.Features(feature={
+                    "image": tf.train.Feature(bytes_list=tf.train.BytesList(value=[image])),
+                    "label": tf.train.Feature(int64_list=tf.train.Int64List(value=[label])),
+                }))
+                # example.SerializeToString()
+                # 将序列化后的example写入文件
+                writer.write(example.SerializeToString())
 
         return None
 
